@@ -1,0 +1,5 @@
+Config = {}
+
+Config.AllowedUrl = {
+    [""] = true
+}
