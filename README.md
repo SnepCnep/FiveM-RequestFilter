@@ -3,7 +3,7 @@ Create a whitelisted URL system for PeformHttpReqeust.
 
 ## Information
 - Author: `snepcnep`
-- Version: `0.0.0`
+- Version: `1.0.0`
 - Status: `Development`
 
 ## Instalation.
@@ -12,3 +12,6 @@ Create a whitelisted URL system for PeformHttpReqeust.
 - start the resource
 - use command in console `frf install confirm`
 - server.cfg and restart the resource first.
+
+## IMPORTANT
+This only checkt request from the resource but not the (monitor & chat) resource.
