@@ -1,4 +1,4 @@
-# fivem-ReqeustBlocker
+# fivem-ReqeustFilter
 Create a whitelisted URL system for PeformHttpReqeust.
 
 ## Information
