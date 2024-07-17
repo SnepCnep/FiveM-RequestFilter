@@ -4,5 +4,6 @@ Create a whitelisted URL system for PeformHttpReqeust.
 ## Instalation.
 - Download the resource.
 - Edit the config.lua
-- server.cfg and start the resource first.
-- restart/start your server.
+- start the resource
+- use command in console `frb install confirm`
+- server.cfg and restart the resource first.
