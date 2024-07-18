@@ -4,7 +4,7 @@ Create a whitelisted URL system for PeformHttpReqeust.
 ## Information
 - Author: `snepcnep`
 - Version: `1.0.0`
-- Status: `Development`
+- Status: `Release`
 
 ## Instalation.
 - Download the resource.
