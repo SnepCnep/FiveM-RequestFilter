@@ -1,4 +1,4 @@
-if GetResourceState("FiveM-ReqeustFilter") == "started" or GetResourceState("ReqeustFilter") == "started" then
+if GetResourceState("FiveM-ReqeustFilter") == "started" then
     local Config = exports["FiveM-ReqeustFilter"]:getConfig()
 
     function IsURLWhitelisted(url)
@@ -13,7 +13,7 @@ if GetResourceState("FiveM-ReqeustFilter") == "started" or GetResourceState("Req
 
     local _PerformHttpRequestInternalEx = PerformHttpRequestInternalEx
     function PerformHttpRequestInternalEx(t)
-        if not IsURLWhitelisted(t.url) then
+        if GetResourceState("FiveM-ReqeustFilter") == "started" and not IsURLWhitelisted(t.url) then
             if Config.ShowData then
                 exports["FiveM-ReqeustFilter"]:WarnURLData(t)
             else
