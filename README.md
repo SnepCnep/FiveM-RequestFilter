@@ -14,7 +14,7 @@ Create a whitelisted URL system for PeformHttpReqeust.
 - server.cfg and restart the resource first.
 
 ## IMPORTANT
-This only checkt request from the resource but not the (monitor & chat) resource.
-
+- This only checkt request from the resource but not the (monitor & chat) resource!
+- This is only for lua resources!
 ## Preview
 ![Preview#1]()
