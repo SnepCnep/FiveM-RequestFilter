@@ -1,7 +1,7 @@
 Config = {}
 Config.ShowData = true
 Config.AutoInstaller = false -- [ Not recommanded but it works! ]
-Config.CheckInstalled = true 
+Config.CheckInstalled = false -- Development!
 
 -------------------------------------
 -- [//[ Allowed URL ]\\] --
