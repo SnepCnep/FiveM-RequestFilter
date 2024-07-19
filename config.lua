@@ -1,5 +1,6 @@
 Config = {}
 Config.ShowData = true
+Config.AutoInstaller = true
 
 -------------------------------------
 -- [//[ Allowed URL ]\\] --
