@@ -24,6 +24,10 @@ function print(message)
     _print("^7[^5Reqeust-Filter^7] ^4- ^7" .. message .. "^7")
 end
 
+if Config.AutoInstaller then
+    Installer()
+end
+
 -- [//[ Installer & Uninstaller ]\\] --
 function Installer()
     local currentResource = "@".. GetCurrentResourceName() .."/init.lua"
@@ -59,8 +63,13 @@ function Installer()
             end
         end
     end
-    print("We have installed ^3".. installcount .." ^0resources!")
-    print("Restart the server to apply the changes!")
+    if installcount ~= 0 then
+        print("We have installed ^3".. installcount .." ^0resources!")
+        print("Restart the server to apply the changes!")
+    else
+        print("No change has been done!")
+    end
+    return installcount
 end
 
 function Uninstaller()
@@ -97,8 +106,13 @@ function Uninstaller()
             end
         end
     end
-    print("We have uninstalled ^3".. uninstallcount .." ^0resources!")
-    print("Restart the server to apply the changes!")
+    if uninstallcount ~= 0 then
+        print("We have uninstalled ^3".. uninstallcount .." ^0resources!")
+        print("Restart the server to apply the changes!")
+    else
+        print("No change has been done!")
+    end
+    return uninstallcount
 end
 
 -- [//[ Functions ]\\] --
