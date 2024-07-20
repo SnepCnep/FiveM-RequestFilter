@@ -36,7 +36,7 @@ function Installer()
     local installcount = 0
     for i = 0, resourceCount - 1 do
         local resourceName = GetResourceByFindIndex(i)
-        if resourceName ~= GetCurrentResourceName() and resourceName ~= "monitor" then
+        if resourceName ~= GetCurrentResourceName() and resourceName ~= "monitor" and not Config.BlacklistedResources[resourceName] then
             local resourcePath = GetResourcePath(resourceName)
             if resourcePath ~= nil then
                 local fxmanifestFile = LoadResourceFile(resourceName, "fxmanifest.lua")
