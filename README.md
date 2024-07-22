@@ -15,7 +15,7 @@ Create a whitelisted URL system for fivem!
 
 ## IMPORTANT
 - This only checkt request from the resource but not the (monitor & chat) resource!
-- This is only for lua resources!
-- 
+- This is only for `lua` resources!
+
 ## Preview
 ![Preview#1]()
