@@ -86,8 +86,8 @@ RegisterCommand("frf:install", function(source, args)
             print("^1Resource: ^3" .. args[1] .. " ^1Dont exists or cant be found!^0")
             return
         end
-        if Config.WhitelistedResource[args[1]] then
-            print("^1Resource: ^3" .. args[1] .. " ^1is whitelisted and cannot be installed.^0")
+        if Config.BlacklistedResources[args[1]] then
+            print("^1Resource: ^3" .. args[1] .. " ^1is Blacklisted and cannot be installed.^0")
             return
         end
         if args[1] == GetCurrentResourceName() then
@@ -105,7 +105,7 @@ RegisterCommand("frf:install", function(source, args)
     local resCount = GetNumResources()
     for i = 0, resCount - 1 do
         local resource = GetResourceByFindIndex(i)
-        if not Config.WhitelistedResource[resource] and resource ~= GetCurrentResourceName() then
+        if not Config.BlacklistedResources[resource] and resource ~= GetCurrentResourceName() then
             if installResource(resource) then
                 print("^2Installed Resource: ^3" .. resource .. " ^2successfully!^0")
             end
