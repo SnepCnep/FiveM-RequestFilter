@@ -1,119 +1,150 @@
--- [//[ Commands ]\\] --
-RegisterCommand("frf", function(source, args)
-    if source == 0 then
-        if args[1] == "install" then
-            if args[2] == "confirm" then
-                Installer()
+_print = print
+function print(message)
+    if not message or type(message) ~= "string" then
+        _print("^7[^5FRF^7] ^4- ^7Invalid message^7")
+        return
+    end
+    _print("^7[^5FRF^7] ^4- ^7" .. message .. "^7")
+end
+
+-- [//[In/Un-stallers]\\] --
+local function isResourceAScript(resourceName)
+    return true -- Check if the resource has client_scripts or client_script
+end
+
+local function installResource(resourceName)
+    if isResourceAScript(resourceName) then
+        local currentResource = "@" .. GetCurrentResourceName() .. "/init.lua"
+        local currentResourceMatch = currentResource:gsub("-", "%%-")
+        local resourcePath = GetResourcePath(resourceName)
+        if resourcePath ~= nil then
+            local fxmanifestFile = LoadResourceFile(resourceName, "fxmanifest.lua")
+            if fxmanifestFile then
+                fxmanifestFile = tostring(fxmanifestFile)
+                local sharedScript = fxmanifestFile:match("shared_script '" .. currentResourceMatch .. "'\n")
+                if not sharedScript then
+                    fxmanifestFile = "shared_script '" .. currentResource .. "'\n" .. fxmanifestFile
+                    SaveResourceFile(resourceName, "fxmanifest.lua", fxmanifestFile, -1)
+                    return true
+                end
             else
-                print("Please use ^0frf install confirm ^5to install all resources!")
+                local __resourceFile = LoadResourceFile(resourceName, "__resource.lua")
+                if __resourceFile then
+                    __resourceFile = tostring(__resourceFile)
+                    local sharedScript = __resourceFile:match("shared_script '" .. currentResourceMatch .. "'\n")
+                    if not sharedScript then
+                        __resourceFile = "shared_script '" .. currentResource .. "'\n" .. __resourceFile
+                        SaveResourceFile(resourceName, "__resource.lua", __resourceFile, -1)
+                        return true
+                    end
+                end
             end
-        elseif args[1] == "uninstall" then
-            if args[2] == "confirm" then
-                Uninstaller()
-            else
-                print("Please use ^0frf uninstall confirm ^5to uninstall all resources!")
+        end
+    end
+
+    return false
+end
+
+local function uninstallResource(resourceName)
+    local currentResource = "@" .. GetCurrentResourceName() .. "/init.lua"
+    local currentResourceMatch = currentResource:gsub("-", "%%-")
+    local resourcePath = GetResourcePath(resourceName)
+    if resourcePath ~= nil then
+        local fxmanifestFile = LoadResourceFile(resourceName, "fxmanifest.lua")
+        if fxmanifestFile then
+            fxmanifestFile = tostring(fxmanifestFile)
+            local sharedScript = fxmanifestFile:match("shared_script '" .. currentResourceMatch .. "'\n")
+            if sharedScript then
+                fxmanifestFile = fxmanifestFile:gsub("shared_script '" .. currentResourceMatch .. "'\n", "")
+                SaveResourceFile(resourceName, "fxmanifest.lua", fxmanifestFile, -1)
+                return true
             end
         else
-            print("This command doesn't exist! ( frf install / frf uninstall )")
+            local __resourceFile = LoadResourceFile(resourceName, "__resource.lua")
+            if __resourceFile then
+                __resourceFile = tostring(__resourceFile)
+                local sharedScript = __resourceFile:match("shared_script '" .. currentResourceMatch .. "'\n")
+                if sharedScript then
+                    __resourceFile = __resourceFile:gsub("shared_script '" .. currentResourceMatch .. "'\n", "")
+                    SaveResourceFile(resourceName, "__resource.lua", __resourceFile, -1)
+                    return true
+                end
+            end
         end
     end
+
+    return false
+end
+
+RegisterCommand("frf:install", function(source, args)
+    if source ~= 0 then
+        return
+    end
+
+    if args[1] then
+        if GetResourceState(args[1]) == "missing" then
+            print("^1Resource: ^3" .. args[1] .. " ^1Dont exists or cant be found!^0")
+            return
+        end
+        if Config.WhitelistedResource[args[1]] then
+            print("^1Resource: ^3" .. args[1] .. " ^1is whitelisted and cannot be installed.^0")
+            return
+        end
+        if args[1] == GetCurrentResourceName() then
+            print("^1Resource: ^3" .. args[1] .. " ^1is the current resource and cannot be installed.^0")
+            return
+        end
+        if installResource(args[1]) then
+            print("^2installed Resource: ^3" .. args[1] .. " ^2successfully!^0")
+        else
+            print("^1Resource: ^3" .. args[1] .. " ^1is already installed.^0")
+        end
+        return
+    end
+
+    local resCount = GetNumResources()
+    for i = 0, resCount - 1 do
+        local resource = GetResourceByFindIndex(i)
+        if not Config.WhitelistedResource[resource] and resource ~= GetCurrentResourceName() then
+            if installResource(resource) then
+                print("^2Installed Resource: ^3" .. resource .. " ^2successfully!^0")
+            end
+        end
+    end
+    print("^2Please restart the server to complete the installation.^0")
 end, false)
 
-local _print = print
-function print(message)
-    _print("^7[^5Reqeust-Filter^7] ^4- ^7" .. message .. "^7")
-end
+RegisterCommand("frf:uninstall", function(source, args)
+    if source ~= 0 then
+        return
+    end
+    if args[1] then
+        if GetResourceState(args[1]) == "missing" then
+            print("^1Resource: ^3" .. args[1] .. " ^1Dont exists or cant be found!^0")
+            return
+        end
 
-if Config.AutoInstaller then
-    Installer()
-end
+        if args[1] == GetCurrentResourceName() then
+            print("^1Resource: ^3" .. args[1] .. " ^1is the current resource and cannot be uninstalled.^0")
+            return
+        end
+        if uninstallResource(args[1]) then
+            print("^2Uninstalled Resource: ^3" .. args[1] .. " ^2successfully!^0")
+        else
+            print("^1Resource: ^3" .. args[1] .. " ^1is already uninstalled.^0")
+        end
+        return
+    end
 
--- [//[ Installer & Uninstaller ]\\] --
-function Installer()
-    local currentResource = "@".. GetCurrentResourceName() .."/init.lua"
-    local currentResourceMatch = currentResource:gsub("-", "%%-")
-    local resourceCount = GetNumResources()
-    local installcount = 0
-    for i = 0, resourceCount - 1 do
-        local resourceName = GetResourceByFindIndex(i)
-        if resourceName ~= GetCurrentResourceName() and resourceName ~= "monitor" and not Config.BlacklistedResources[resourceName] then
-            local resourcePath = GetResourcePath(resourceName)
-            if resourcePath ~= nil then
-                local fxmanifestFile = LoadResourceFile(resourceName, "fxmanifest.lua")
-                if fxmanifestFile then
-                    fxmanifestFile = tostring(fxmanifestFile)
-                    local sharedScript = fxmanifestFile:match("server_script '"..currentResourceMatch.."'\n")
-                    if not sharedScript then
-                        fxmanifestFile = "server_script '".. currentResource .."'\n" .. fxmanifestFile
-                        SaveResourceFile(resourceName, "fxmanifest.lua", fxmanifestFile, -1)
-                        installcount = installcount + 1
-                    end
-                else 
-                    local __resourceFile = LoadResourceFile(resourceName, "__resource.lua")
-                    if __resourceFile then
-                        __resourceFile = tostring(__resourceFile)
-                        local sharedScript = __resourceFile:match("server_script '"..currentResourceMatch.."'\n")
-                        if not sharedScript then
-                            __resourceFile = "server_script '".. currentResource .."'\n" .. __resourceFile
-                            SaveResourceFile(resourceName, "__resource.lua", __resourceFile, -1)
-                            installcount = installcount + 1
-                        end
-                    end
-                end
-            end
+    local resCount = GetNumResources()
+    for i = 0, resCount - 1 do
+        local resource = GetResourceByFindIndex(i)
+        if uninstallResource(resource) then
+            print("^1Uninstalled Resource: ^3" .. resource .. " ^1successfully!^0")
         end
     end
-    if installcount ~= 0 then
-        print("We have installed ^3".. installcount .." ^0resources!")
-        print("Restart the server to apply the changes!")
-    else
-        print("No change has been done!")
-    end
-    return installcount
-end
-
-function Uninstaller()
-    local currentResource = "@".. GetCurrentResourceName() .."/init.lua"
-    local currentResourceMatch = currentResource:gsub("-", "%%-")
-    local resourceCount = GetNumResources()
-    local uninstallcount = 0
-    for i = 0, resourceCount - 1 do
-        local resourceName = GetResourceByFindIndex(i)
-        if resourceName ~= GetCurrentResourceName() then
-            local resourcePath = GetResourcePath(resourceName)
-            if resourcePath ~= nil then
-                local fxmanifestFile = LoadResourceFile(resourceName, "fxmanifest.lua")
-                if fxmanifestFile then
-                    fxmanifestFile = tostring(fxmanifestFile)
-                    local sharedScript = fxmanifestFile:match("server_script '"..currentResourceMatch.."'\n")
-                    if sharedScript then
-                        fxmanifestFile = fxmanifestFile:gsub("server_script '"..currentResourceMatch.."'\n", "")
-                        SaveResourceFile(resourceName, "fxmanifest.lua", fxmanifestFile, -1)
-                        uninstallcount = uninstallcount + 1
-                    end
-                else 
-                    local __resourceFile = LoadResourceFile(resourceName, "__resource.lua")
-                    if __resourceFile then
-                        __resourceFile = tostring(__resourceFile)
-                        local sharedScript = __resourceFile:match("server_script '"..currentResourceMatch.."'\n")
-                        if sharedScript then
-                            __resourceFile = __resourceFile:gsub("server_script '"..currentResourceMatch.."'\n", "")
-                            SaveResourceFile(resourceName, "__resource.lua", __resourceFile, -1)
-                            uninstallcount = uninstallcount + 1
-                        end
-                    end
-                end
-            end
-        end
-    end
-    if uninstallcount ~= 0 then
-        print("We have uninstalled ^3".. uninstallcount .." ^0resources!")
-        print("Restart the server to apply the changes!")
-    else
-        print("No change has been done!")
-    end
-    return uninstallcount
-end
+    print("^1Please restart the server to complete the uninstallation.^0")
+end, false)
 
 -- [//[ Functions ]\\] --
 function exports(exportName, exportFunc)
